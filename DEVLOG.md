@@ -45,4 +45,17 @@ Apparently, you have to turn off TLS for MacOS grpc dev?
 
 After following the instructions and creating a non-TLS endpoint, `dotnet run` works.
 
+---
 
+Added a tool manifest and dotnet format:
+
+```
+dotnet new tool-manifest
+dotnet tool install dotnet-format
+```
+
+Added a `Makefile` to make running some scripts easier.  Can run format from it:
+
+```
+make fmt
+```
