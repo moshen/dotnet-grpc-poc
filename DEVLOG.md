@@ -84,3 +84,20 @@ How I fixed:
   dotnet run --project src/DotnetGrpcPoc/
   ```
 
+Now to add some tests...
+
+* Add a tests folder that follows the dotnet convention
+  ```bash
+  dotnet new xunit -o tests/DotnetGrpcPoc.Tests
+  ```
+* Add a reference from the unit test folder to the project src
+  ```bash
+  cd tests/DotnetGrpcPoc.Tests
+  dotnet add reference ../../src/DotnetGrpcPoc/DotnetGrpcPoc.csproj
+  ```
+* Add new `test` convenience script
+  ```
+  make test
+  dotnet run --project src/DotnetGrpcPoc/
+  ```
+
