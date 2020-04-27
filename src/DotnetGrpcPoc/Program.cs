@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Hosting;
 
-namespace dotnet_grpc_poc
+namespace DotnetGrpcPoc
 {
     public class Program
     {

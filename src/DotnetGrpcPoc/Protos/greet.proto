@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option csharp_namespace = "dotnet_grpc_poc";
+option csharp_namespace = "DotnetGrpcPoc";
 
 package greet;
 

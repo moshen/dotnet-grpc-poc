@@ -44,18 +44,43 @@ Apparently, you have to turn off TLS for MacOS grpc dev?
 ```
 
 After following the instructions and creating a non-TLS endpoint, `dotnet run` works.
+The instructions were to allow a TLS override for localhost.
 
 ---
 
 Added a tool manifest and dotnet format:
 
-```
+```bash
 dotnet new tool-manifest
 dotnet tool install dotnet-format
 ```
 
 Added a `Makefile` to make running some scripts easier.  Can run format from it:
 
-```
+```bash
 make fmt
 ```
+
+---
+
+Apparently I didn't setup my project with the correct format? In order to have tests I should
+have a project folder for my service ***AND*** my tests.
+
+How I fixed:
+
+* Recreate the project in a src folder:
+  ```bash
+  dotnet new grpc -o src/DotnetGrpcPoc
+  ```
+  Applied fixes from above
+* Modify `Makefile` `fmt` script:
+  ```bash
+  dotnet tool run dotnet-format -f .
+  ```
+  Formats the entire directory tree
+* Add new `run` convenience script
+  ```
+  make run
+  dotnet run --project src/DotnetGrpcPoc/
+  ```
+
