@@ -151,3 +151,19 @@ After implementing the override found in:
 https://github.com/grpc/grpc-dotnet/blob/cf09aafcedd306743f35094f04e473abf5aa41a5/examples/Tester/Tests/FunctionalTests/Helpers/GrpcTestFixture.cs
 
 Everything works correctly.
+
+---
+
+Realized I should have a solution file to tie my subprojects together. Created
+by running:
+
+```bash
+dotnet new sln
+dotnet sln add src/DotnetGrpcPoc/
+dotnet sln add tests/DotnetGrpcPoc.Tests/
+```
+
+Can now run commands like `dotnet test` in the top level directory and it just
+works.
+
+Might not need `make`?
