@@ -2,6 +2,12 @@
 
 ## 2020-04-27
 
+Installed `dotnet` toolchain with homebrew:
+
+```bash
+brew cask install dotnet-sdk
+```
+
 Created the repo with:
 
 ```bash
