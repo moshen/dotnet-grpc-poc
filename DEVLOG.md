@@ -194,9 +194,9 @@ dotnet restore --locked-mode
 
 ---
 
-Add a Bidirectional streaming service (meant to run the imagemagick
-convert tool eventually). This is kind of a pain, as we need to do a little
-bit of bookkeeping to get working correctly.
+Add a Bidirectional streaming service (meant to run the imagemagick `convert`
+tool eventually). This is kind of a pain, as we need to do a little bit of
+bookkeeping to get working correctly.
 
 Simple echo stream:
 
@@ -213,3 +213,36 @@ public override async Task Convert(
     }
 }
 ```
+
+---
+
+Got the bidirectional convert service functioning. Piping binary data to / from
+external processes was not intuitive.  Apparently you need to pull off the
+`BaseStream` of the process wrapped streams:
+
+```csharp
+var standardInput = convertProcess.StandardInput.BaseStream;
+var standardOutput = convertProcess.StandardOutput.BaseStream;
+```
+
+This results in a `System.IO.Stream` that exposes / consumes `byte[]`.
+
+Unfortunately, this whole process results in copying byte buffers in the server
+and client. I don't think this can be helped for gRPC.
+
+In the end, everything works.  I have a service that accepts streaming image
+data, takes that streamed series of bytes passes them into the imagemagick cli,
+and converts it to a png. Piping the resulting image back.
+
+One strange thing to figure out was how to test / query the resulting image
+data. This could change out from under me. I settled on
+[ImageSharp](https://github.com/SixLabors/ImageSharp), which was more finicky
+to install than I would have hoped. I was required to specify a previous
+prerelease version for install to work correctly:
+
+```bash
+dotnet add tests/DotnetGrpcPoc.Tests/ package SixLabors.ImageSharp -v 1.0.0-beta0007
+```
+
+Once I had this setup, it was easy to load the resulting image data from a
+`byte[]` and query it.
