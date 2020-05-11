@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Hosting;
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -53,6 +54,42 @@ namespace DotnetGrpcPoc.Tests
             var reply = await greeterClient.SayHelloAsync(
                 new HelloRequest { Name = "World" });
             reply.Message.Should().Be("Hello World");
+        }
+
+        [Fact]
+        public async void Test_ConverterStream()
+        {
+            var channel = GrpcChannel.ForAddress("http://localhost", new GrpcChannelOptions()
+            {
+                HttpClient = _client
+            });
+            var converterClient = new Converter.ConverterClient(channel);
+
+            var convertStream = converterClient.Convert();
+            var testData = new List<Chunk>();
+            testData.Add(new Chunk() {
+                Data = Google.Protobuf.ByteString.CopyFromUtf8("1")
+            });
+            testData.Add(new Chunk() {
+                Data = Google.Protobuf.ByteString.CopyFromUtf8("2")
+            });
+            testData.Add(new Chunk() {
+                Data = Google.Protobuf.ByteString.CopyFromUtf8("3")
+            });
+
+            foreach (var item in testData)
+            {
+                convertStream.RequestStream.WriteAsync(item);
+            }
+            await convertStream.RequestStream.CompleteAsync();
+
+            var t = new CancellationToken();
+            var i = 0;
+            var testDataArr = testData.ToArray();
+            while (await convertStream.ResponseStream.MoveNext(t))
+            {
+                convertStream.ResponseStream.Current.Data.Should().BeEquivalentTo(testDataArr[i++].Data);
+            }
         }
 
         private class ResponseVersionHandler : DelegatingHandler

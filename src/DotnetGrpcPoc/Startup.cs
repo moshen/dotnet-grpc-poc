@@ -32,6 +32,7 @@ namespace DotnetGrpcPoc
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapGrpcService<GreeterService>();
+                endpoints.MapGrpcService<ConverterService>();
 
                 endpoints.MapGet("/", async context =>
                 {

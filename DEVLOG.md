@@ -191,3 +191,25 @@ Restore deps from only their locked versions:
 ```bash
 dotnet restore --locked-mode
 ```
+
+---
+
+Add a Bidirectional streaming service (meant to run the imagemagick
+convert tool eventually). This is kind of a pain, as we need to do a little
+bit of bookkeeping to get working correctly.
+
+Simple echo stream:
+
+```csharp
+public override async Task Convert(
+    IAsyncStreamReader<Chunk> requestStream,
+    IServerStreamWriter<Chunk> responseStream,
+    ServerCallContext context)
+{
+    // Echo back bytes
+    while(await requestStream.MoveNext())
+    {
+        await responseStream.WriteAsync(requestStream.Current);
+    }
+}
+```

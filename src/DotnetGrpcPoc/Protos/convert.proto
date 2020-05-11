@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+option csharp_namespace = "DotnetGrpcPoc";
+
+package convert;
+
+service Converter {
+  rpc Convert (stream Chunk) returns (stream Chunk);
+}
+
+message Chunk {
+  bytes Data = 1;
+}
