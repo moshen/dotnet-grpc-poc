@@ -173,3 +173,21 @@ Can now run commands like `dotnet test` in the top level directory and it just
 works.
 
 Might not need `make`?
+
+---
+
+## 2020-05-11
+
+`dotnet` has lockfiles for dependencies?
+
+Generate the lockfiles for everything in the solution:
+
+```bash
+dotnet restore --use-lock-file
+```
+
+Restore deps from only their locked versions:
+
+```bash
+dotnet restore --locked-mode
+```
