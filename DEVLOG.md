@@ -194,7 +194,7 @@ dotnet restore --locked-mode
 
 ---
 
-Add a Bidirectional streaming service (meant to run the imagemagick `convert`
+Added a Bidirectional streaming service (meant to run the imagemagick `convert`
 tool eventually). This is kind of a pain, as we need to do a little bit of
 bookkeeping to get working correctly.
 
@@ -246,3 +246,28 @@ dotnet add tests/DotnetGrpcPoc.Tests/ package SixLabors.ImageSharp -v 1.0.0-beta
 
 Once I had this setup, it was easy to load the resulting image data from a
 `byte[]` and query it.
+
+---
+
+## 2020-05-12
+
+Added a node client!
+
+I ended up going with the dynamically generated client (from the proto file)
+based on the example here:
+
+https://github.com/grpc/grpc/blob/cb81fe0dfaa424eb50de26fb7c904a27a78c3f76/examples/node/dynamic_codegen/greeter_client.js
+
+`make test` will now run both the dotnet tests, and full integration tests with
+the node client and dotnet server.
+
+This probably isn't as clean as I want it. I've already noticed a few issues:
+
+* No way to cancel the server side stream
+* No way to get error messages / codes to the client
+* The streaming api is a little obtuse
+* Names and casing apparently matters in the proto files
+
+The solutions to some of these might be to add some properties / enums to the
+protobuf definition.  It also seems like struct properties should be lower case
+in the proto files for consistency.
