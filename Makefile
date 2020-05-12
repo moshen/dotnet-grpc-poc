@@ -1,3 +1,4 @@
+SHELL:=/bin/bash
 .PHONEY: fmt test run
 
 fmt:
@@ -5,6 +6,7 @@ fmt:
 
 test:
 	dotnet test tests/DotnetGrpcPoc.Tests/
+	tests/scripts/runClientServerTests.bash
 
 run:
 	dotnet run --project src/DotnetGrpcPoc/

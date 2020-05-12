@@ -27,10 +27,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Protobuf Include="..\..\src\DotnetGrpcPoc\Protos\greet.proto" GrpcServices="Client" />
+    <Protobuf Include="..\..\src\protos\greet.proto" GrpcServices="Client" />
   </ItemGroup>
   <ItemGroup>
-    <Protobuf Include="..\..\src\DotnetGrpcPoc\Protos\convert.proto" GrpcServices="Client" />
+    <Protobuf Include="..\..\src\protos\convert.proto" GrpcServices="Client" />
   </ItemGroup>
 
 </Project>

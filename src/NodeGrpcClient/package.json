@@ -1,0 +1,23 @@
+{
+  "name": "nodegrpcclient",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "files": [
+    "protos/*.proto"
+  ],
+  "author": "",
+  "private": true,
+  "dependencies": {
+    "@grpc/proto-loader": "^0.5.4",
+    "grpc": "^1.24.2"
+  },
+  "devDependencies": {
+    "file-type": "^14.3.0",
+    "mocha": "^7.1.2",
+    "should": "^13.2.3"
+  }
+}

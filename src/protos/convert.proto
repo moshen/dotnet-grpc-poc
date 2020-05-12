@@ -9,5 +9,5 @@ service Converter {
 }
 
 message Chunk {
-  bytes Data = 1;
+  bytes data = 1;
 }
