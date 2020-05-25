@@ -1,4 +1,20 @@
 const path = require('path');
+const { NodeTracerProvider } = require("@opentelemetry/node");
+const { SimpleSpanProcessor } = require("@opentelemetry/tracing");
+const { JaegerExporter } = require("@opentelemetry/exporter-jaeger");
+
+const tracerProvider = new NodeTracerProvider();
+tracerProvider.addSpanProcessor(
+  new SimpleSpanProcessor(
+    new JaegerExporter({
+      serviceName: 'NodeGrpcClient',
+      host: 'localhost',
+      port: 6832
+    })
+  )
+);
+tracerProvider.register();
+
 const grpc = require('grpc');
 const protoLoader = require('@grpc/proto-loader');
 const PROTO_PATH = path.resolve(path.join(__dirname, '../protos/'));

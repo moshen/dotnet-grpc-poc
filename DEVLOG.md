@@ -392,3 +392,67 @@ public override Task<HelloReply> SayHello(HelloRequest request, ServerCallContex
 }
 ```
 
+---
+
+Added inter-service tracing with OpenTelemetry in the Node client.
+
+Installed packages:
+
+```bash
+cd src/NodeGrpcClient
+npm install --save \
+  @opentelemetry/core \
+  @opentelemetry/exporter-jaeger \
+  @opentelemetry/node \
+  @opentelemetry/plugin-grpc \
+  @opentelemetry/plugin-http \
+  @opentelemetry/tracing
+```
+
+Configuration from that point was fairly straightforward:
+
+```javascript
+const { NodeTracerProvider } = require("@opentelemetry/node");
+const { SimpleSpanProcessor } = require("@opentelemetry/tracing");
+const { JaegerExporter } = require("@opentelemetry/exporter-jaeger");
+
+const tracerProvider = new NodeTracerProvider();
+tracerProvider.addSpanProcessor(
+  new SimpleSpanProcessor(
+    new JaegerExporter({
+      serviceName: 'NodeGrpcClient',
+      host: 'localhost',
+      port: 6832
+    })
+  )
+);
+tracerProvider.register();
+```
+
+With the global hook registered, the client automatically creates and sends
+traces for the gRPC client calls.
+
+When looking into how this mechanism works, I found there is a [new W3C
+standard for sending trace parent ids](https://www.w3.org/TR/trace-context/)
+which OpenTelemetry adheres to on the client and server side. This exact same
+mechanism should work just as well for REST clients / servers as gRPC.
+
+One gotcha was I had to adjust the Jaeger exposed ports. For some reason, the
+default for the [Node version of Jaeger
+OpenTelemetry](https://github.com/open-telemetry/opentelemetry-js) is to use
+port `6832` instead of `6831`. The [Jaeger
+docs](https://www.jaegertracing.io/docs/1.18/getting-started/) have some
+details on the differences:
+
+- 6831 UDP - accept jaeger.thrift over compact thrift protocol
+- 6832 UDP - accept jaeger.thrift over binary thrift protocol
+
+Once I figured this out, I made a change to my `Makefile`:
+
+```bash
+docker run -d --name jaeger -p 6831:6831/udp -p 6832:6832/udp -p 16686:16686 jaegertracing/all-in-one:1.18
+```
+
+After all this, running `make test` produces lovely multi-service traces in Jaeger:
+
+![Jaeger Trace](DEVLOG/jaeger-trace.png)
