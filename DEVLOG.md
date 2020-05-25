@@ -271,3 +271,124 @@ This probably isn't as clean as I want it. I've already noticed a few issues:
 The solutions to some of these might be to add some properties / enums to the
 protobuf definition.  It also seems like struct properties should be lower case
 in the proto files for consistency.
+
+---
+
+## 2020-05-25
+
+Added [OpenTelemetry](https://opentelemetry.io/) tracing to the app. Sending
+data to [Jaeger](https://www.jaegertracing.io/).
+
+The benefit of using OpenTelemetry is that you can switch out the underlying
+exporter.
+
+OpenTelemetry is pretty early in it's development so we have to add prerelease
+packages from myget:
+
+```bash
+dotnet nuget add source -n "OpenTelemetry" https://www.myget.org/F/opentelemetry/api/v3/index.json
+```
+
+Then we can install all our required packages:
+
+```bash
+dotnet add package OpenTelemetry.Api -v 0.2.0-alpha.296
+dotnet add package OpenTelemetry.Exporter.Jaeger -v 0.2.0-alpha.296
+dotnet add package OpenTelemetry.Extensions.Hosting -v 0.2.0-alpha.296
+dotnet add package OpenTelemetry.Instrumentation.AspNetCore -v 0.2.0-alpha.296
+dotnet add package OpenTelemetry.Instrumentation.Dependencies -v 0.2.0-alpha.296
+```
+
+The documentation for OpenTelemetry for dotnet are a little sparse, and to find
+out *why* all these packages are necessary, I had to dig around in the
+OpenTelemetry example code.
+
+For an explanation:
+
+`OpenTelemetry.Api` - This is core
+
+`OpenTelemetry.Exporter.Jaeger` - Need this to export to Jaeger
+
+`OpenTelemetry.Extensions.Hosting` - This is required to hook the web `Startup`
+configuration
+
+`OpenTelemetry.Instrumentation.AspNetCore` - This is required to automatically
+generate tracing spans for every request
+
+`OpenTelemetry.Instrumentation.Dependencies` - This is required to
+automatically create tracing spans for dependencies (I don't really have any
+dependencies that use this yet, but I thought I should add it).
+
+From `Startup.cs`:
+
+```csharp
+public void ConfigureServices(IServiceCollection services)
+{
+    // OpenTelemetry.Extensions.Hosting adds this method
+    services.AddOpenTelemetry((sp, builder) =>
+    {
+        // Sample everything
+        builder.SetSampler(new AlwaysOnSampler())
+        .UseJaeger(o =>
+        {
+            o.ServiceName = "DotnetGrpcPoc";
+            o.AgentHost = "localhost";
+            o.AgentPort = 6831;
+        })
+        // OpenTelemetry.Instrumentation.AspNetCore adds this method
+        .AddRequestInstrumentation()
+        // OpenTelemetry.Instrumentation.Dependencies adds this method
+        .AddDependencyInstrumentation();
+    });
+}
+```
+
+Now that all the configration is in place, we can run Jaeger to see traces get
+populated:
+
+```bash
+docker run -d --name jaeger -p 6831:6831/udp -p 16686:16686 jaegertracing/all-in-one:1.18
+```
+
+- Port `6831` is the port udp traces are sent to the collector
+- Port `16686` is the web interface
+
+I made a `Makefile` target to make starting this easy:
+
+```bash
+make run-jaeger
+```
+
+With Jaeger running, we can re-run our test suite and see traces populate for
+the base calls.
+
+Next, we want to add custom spans to our service calls.  With our current
+config, the tracer factory is injected into every service, and we can stash a
+reference to the tracer object in our constructor:
+
+```csharp
+private readonly Tracer _tracer;
+public SomeService(TracerFactory tracerFactory)
+{
+    _tracer = tracerFactory.GetTracer("DotnetGrpcPoc");
+}
+```
+
+Now that we have a tracer, we can start adding custom spans to our traces. From `GreeterService`:
+
+```csharp
+public override Task<HelloReply> SayHello(HelloRequest request, ServerCallContext context)
+{
+    // This is an unnecessary manual span
+    var span = _tracer.StartSpan("SayHello");
+    var task = Task.FromResult(new HelloReply
+    {
+        Message = "Hello " + request.Name
+    });
+    var awaiter = task.GetAwaiter();
+    awaiter.OnCompleted(() => span.End());
+
+    return task;
+}
+```
+
