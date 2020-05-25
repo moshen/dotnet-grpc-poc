@@ -456,3 +456,18 @@ docker run -d --name jaeger -p 6831:6831/udp -p 6832:6832/udp -p 16686:16686 jae
 After all this, running `make test` produces lovely multi-service traces in Jaeger:
 
 ![Jaeger Trace](DEVLOG/jaeger-trace.png)
+
+---
+
+Added `NuGet.Config`. This tells `dotnet restore` and other `nuget` commands
+where to go for their packages. Revised commands look like:
+
+```bash
+cat <<END > NuGet.Config
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+</configuration>
+END
+dotnet nuget add source --configfile NuGet.Config -n "OpenTelemetry" https://www.myget.org/F/opentelemetry/api/v3/index.json
+```
+
