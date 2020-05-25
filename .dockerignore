@@ -1,0 +1,6 @@
+*
+!NuGet.Config
+!src/DotnetGrpcPoc/
+src/DotnetGrpcPoc/bin
+src/DotnetGrpcPoc/obj
+!src/protos/

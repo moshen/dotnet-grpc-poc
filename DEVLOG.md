@@ -470,4 +470,32 @@ cat <<END > NuGet.Config
 END
 dotnet nuget add source --configfile NuGet.Config -n "OpenTelemetry" https://www.myget.org/F/opentelemetry/api/v3/index.json
 ```
+---
+
+Added Docker support for the POC server. While this required some very specific
+`COPY` commands to make sure all that paths lined up, everything worked as
+expected.
+
+```bash
+make docker-build
+```
+
+Will run the build.
+
+```bash
+make docker-restart
+```
+
+Will build / stop / start the docker container.
+
+After building / starting the container, we can run the Node client tests
+against it directly:
+
+```bash
+cd src/NodeGrpcClient
+npx mocha test/
+```
+
+One thing I didn't bother figuring out was getting the traces sent from the
+`dotnet-grpc-poc` container to the `jaeger` container.
 
