@@ -2,9 +2,11 @@ FROM mcr.microsoft.com/dotnet/core/sdk:3.1 as builder
 
 WORKDIR /app
 COPY ./NuGet.Config ./
-COPY ./src/DotnetGrpcPoc/DotnetGrpcPoc.csproj ./
+COPY ./src/DotnetGrpcPoc/DotnetGrpcPoc.csproj \
+  ./src/DotnetGrpcPoc/packages.lock.json \
+  ./
 
-RUN dotnet restore
+RUN dotnet restore --locked-mode
 
 COPY ./src/DotnetGrpcPoc/ ./
 COPY ./src/protos ../protos

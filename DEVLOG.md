@@ -499,3 +499,8 @@ npx mocha test/
 One thing I didn't bother figuring out was getting the traces sent from the
 `dotnet-grpc-poc` container to the `jaeger` container.
 
+---
+
+Fixed `Dockerfile` to use the package lock file I mention earlier in this
+DEVLOG. Whoops...
+
