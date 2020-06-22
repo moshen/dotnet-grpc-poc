@@ -504,3 +504,35 @@ One thing I didn't bother figuring out was getting the traces sent from the
 Fixed `Dockerfile` to use the package lock file I mention earlier in this
 DEVLOG. Whoops...
 
+---
+
+## 2020-06-22
+
+Updated all the outdated OpenTelemetry packages
+
+```bash
+cd src/DotnetGrpcPoc/
+dotnet add package OpenTelemetry.Api -v 0.2.0-alpha.297
+dotnet add package OpenTelemetry.Exporter.Jaeger -v 0.2.0-alpha.297
+dotnet add package OpenTelemetry.Extensions.Hosting -v 0.2.0-alpha.297
+dotnet add package OpenTelemetry.Instrumentation.AspNetCore -v 0.2.0-alpha.297
+dotnet add package OpenTelemetry.Instrumentation.Dependencies -v 0.2.0-alpha.297
+
+cd -
+
+cd tests/DotnetGrpcPoc.Tests/
+dotnet add package OpenTelemetry.Api -v 0.2.0-alpha.297
+dotnet add package OpenTelemetry.Exporter.Jaeger -v 0.2.0-alpha.297
+dotnet add package OpenTelemetry.Extensions.Hosting -v 0.2.0-alpha.297
+dotnet add package OpenTelemetry.Instrumentation.AspNetCore -v 0.2.0-alpha.297
+dotnet add package OpenTelemetry.Instrumentation.Dependencies -v 0.2.0-alpha.297
+```
+
+After doing that:
+
+```bash
+make bootstrap
+```
+
+Works again. Probably shouldn't have used alpha packages...
+
