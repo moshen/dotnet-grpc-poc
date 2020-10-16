@@ -1,12 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using OpenTelemetry.Trace;
-using OpenTelemetry.Trace.Configuration;
 
 namespace DotnetGrpcPoc
 {
@@ -14,10 +9,10 @@ namespace DotnetGrpcPoc
     {
         private readonly ILogger<GreeterService> _logger;
         private readonly Tracer _tracer;
-        public GreeterService(ILogger<GreeterService> logger, TracerFactory tracerFactory)
+        public GreeterService(ILogger<GreeterService> logger, TracerProvider tracerProvider)
         {
             _logger = logger;
-            _tracer = tracerFactory.GetTracer("DotnetGrpcPoc");
+            _tracer = tracerProvider.GetTracer("DotnetGrpcPoc");
         }
 
         public override Task<HelloReply> SayHello(HelloRequest request, ServerCallContext context)

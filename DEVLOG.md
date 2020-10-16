@@ -536,3 +536,35 @@ make bootstrap
 
 Works again. Probably shouldn't have used alpha packages...
 
+---
+
+## 2020-09-21
+
+Updated all the outdated OpenTelemetry packages
+
+```bash
+cd src/DotnetGrpcPoc/
+dotnet add package OpenTelemetry.Api -v 0.6.0-beta.1
+dotnet add package OpenTelemetry.Exporter.Jaeger -v 0.6.0-beta.1
+dotnet add package OpenTelemetry.Extensions.Hosting -v 0.6.0-beta.1
+dotnet add package OpenTelemetry.Instrumentation.AspNetCore -v 0.6.0-beta.1
+dotnet add package OpenTelemetry.Instrumentation.GrpcNetClient -v 0.6.0-beta.1
+
+cd -
+
+cd tests/DotnetGrpcPoc.Tests/
+dotnet add package OpenTelemetry.Api -v 0.6.0-beta.1
+dotnet add package OpenTelemetry.Exporter.Jaeger -v 0.6.0-beta.1
+dotnet add package OpenTelemetry.Extensions.Hosting -v 0.6.0-beta.1
+dotnet add package OpenTelemetry.Instrumentation.AspNetCore -v 0.6.0-beta.1
+dotnet add package OpenTelemetry.Instrumentation.GrpcNetClient -v 0.6.0-beta.1
+```
+
+After doing that:
+
+```bash
+make bootstrap
+```
+
+Works again. Using beta packages now?
+
