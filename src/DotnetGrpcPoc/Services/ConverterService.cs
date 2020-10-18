@@ -11,14 +11,11 @@ namespace DotnetGrpcPoc
     {
         const int ReadBufSize = 1024;
         private readonly ILogger<ConverterService> _logger;
-        private readonly Tracer _tracer;
-
         private readonly ActivitySource _activitySource;
-        public ConverterService(ILogger<ConverterService> logger, TracerProvider tracerProvider, ActivitySource activitySource)
+        public ConverterService(ILogger<ConverterService> logger)
         {
             _logger = logger;
-            _tracer = tracerProvider.GetTracer("DotnetGrpcPoc");
-            _activitySource = activitySource;
+            _activitySource = new ActivitySource("DotnetGrpcPoc.ConverterService");
         }
 
         public override async Task Convert(
@@ -26,14 +23,7 @@ namespace DotnetGrpcPoc
             IServerStreamWriter<Chunk> responseStream,
             ServerCallContext context)
         {
-            try {
-            var activity = _activitySource.StartActivity("Loading DotnetGrpcPoc");
-            activity?.Stop();
-            } catch(System.Exception ex) {
-                System.Console.Out.WriteLine("Caught something: %s", ex);
-            }
-
-            var span = _tracer.StartActiveSpan("Convert");
+            var span = _activitySource.StartActivity("Convert", ActivityKind.Server);
             var convertProcess = new Process();
             // Imagemagick
             convertProcess.StartInfo.FileName = "convert";
@@ -46,7 +36,7 @@ namespace DotnetGrpcPoc
             var standardInput = convertProcess.StandardInput.BaseStream;
             var standardOutput = convertProcess.StandardOutput.BaseStream;
 
-            var receivingSpan = _tracer.StartActiveSpan("Receiving");
+            using (var receivingSpan = _activitySource.StartActivity("Receiving", ActivityKind.Server))
             {
                 var chunk = 0;
                 var size = 0;
@@ -59,14 +49,13 @@ namespace DotnetGrpcPoc
                     await standardInput.WriteAsync(data, 0, data.Length);
                 }
 
-                receivingSpan.SetAttribute("Chunks", chunk);
-                receivingSpan.SetAttribute("Size", size);
-                receivingSpan.End();
+                receivingSpan.SetTag("Chunks", chunk);
+                receivingSpan.SetTag("Size", size);
             }
 
             standardInput.Close();
 
-            var sendingSpan = _tracer.StartActiveSpan("Sending");
+            using (var sendingSpan = _activitySource.StartActivity("Sending", ActivityKind.Server))
             {
                 var buf = new byte[ReadBufSize];
                 var size = 0;
@@ -86,13 +75,11 @@ namespace DotnetGrpcPoc
                     });
                 }
 
-                sendingSpan.SetAttribute("Size", size);
-                sendingSpan.End();
+                sendingSpan.SetTag("Size", size);
             }
 
             convertProcess.WaitForExit();
-            span.SetAttribute("ExitCode", convertProcess.ExitCode);
-            span.End();
+            span.SetTag("ExitCode", convertProcess.ExitCode);
         }
     }
 }
