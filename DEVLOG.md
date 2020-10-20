@@ -536,3 +536,62 @@ make bootstrap
 
 Works again. Probably shouldn't have used alpha packages...
 
+---
+
+## 2020-10-19
+
+Updated all the outdated OpenTelemetry packages to the latest beta on NuGet.
+Removed the `OpenTelemetry.Instrumentation.Dependencies` packages, as they
+no longer appear to exist.
+
+```bash
+cd src/DotnetGrpcPoc/
+dotnet remove package OpenTelemetry.Instrumentation.Dependencies
+dotnet add package OpenTelemetry.Api -v 0.7.0-beta.1
+dotnet add package OpenTelemetry.Exporter.Jaeger -v 0.7.0-beta.1
+dotnet add package OpenTelemetry.Extensions.Hosting -v 0.7.0-beta.1
+dotnet add package OpenTelemetry.Instrumentation.AspNetCore -v 0.7.0-beta.1
+
+cd -
+
+cd tests/DotnetGrpcPoc.Tests/
+dotnet remove package OpenTelemetry.Instrumentation.Dependencies
+dotnet add package OpenTelemetry.Api -v 0.7.0-beta.1
+dotnet add package OpenTelemetry.Exporter.Jaeger -v 0.7.0-beta.1
+dotnet add package OpenTelemetry.Extensions.Hosting -v 0.7.0-beta.1
+dotnet add package OpenTelemetry.Instrumentation.AspNetCore -v 0.7.0-beta.1
+```
+
+After doing that:
+
+```bash
+make bootstrap
+```
+
+Now the newer versions of OpenTelemetry for dotnet have switched their api to
+use the standard `Activity` api from Microsoft:
+
+https://github.com/open-telemetry/opentelemetry-dotnet/issues/947
+
+Changing from one api to the other mainly involved creating `Activity`
+objects from an `ActivitySource` I defined, and using those in place of my
+previous trace `Span` objects. The only large hangup was finding out that
+new `ActivitySource` strings must be "registered" in my `Startup.cs`:
+
+```csharp
+services.AddOpenTelemetryTracing((sp, builder) =>
+{
+    // Sample everything
+    builder.SetSampler(new AlwaysOnSampler())
+    .AddJaegerExporter(o =>
+    {
+        o.ServiceName = "DotnetGrpcPoc";
+        o.AgentHost = jaegerUrl;
+        o.AgentPort = jaegerPort;
+    })
+    .AddSource("DotnetGrpcPoc.ConverterService", "DotnetGrpcPoc.GreeterService")
+    .AddAspNetCoreInstrumentation();
+});
+```
+
+With those changes in place, everything works again.

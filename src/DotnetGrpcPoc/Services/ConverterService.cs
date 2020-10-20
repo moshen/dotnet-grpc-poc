@@ -3,8 +3,6 @@ using System.Threading.Tasks;
 using Google.Protobuf;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
-using OpenTelemetry.Trace;
-using OpenTelemetry.Trace.Configuration;
 
 namespace DotnetGrpcPoc
 {
@@ -12,11 +10,11 @@ namespace DotnetGrpcPoc
     {
         const int ReadBufSize = 1024;
         private readonly ILogger<ConverterService> _logger;
-        private readonly Tracer _tracer;
-        public ConverterService(ILogger<ConverterService> logger, TracerFactory tracerFactory)
+        private readonly ActivitySource _activitySource;
+        public ConverterService(ILogger<ConverterService> logger)
         {
             _logger = logger;
-            _tracer = tracerFactory.GetTracer("DotnetGrpcPoc");
+            _activitySource = new ActivitySource("DotnetGrpcPoc.ConverterService");
         }
 
         public override async Task Convert(
@@ -24,7 +22,7 @@ namespace DotnetGrpcPoc
             IServerStreamWriter<Chunk> responseStream,
             ServerCallContext context)
         {
-            var span = _tracer.StartSpan("Convert");
+            var span = _activitySource.StartActivity("Convert");
             var convertProcess = new Process();
             // Imagemagick
             convertProcess.StartInfo.FileName = "convert";
@@ -37,7 +35,7 @@ namespace DotnetGrpcPoc
             var standardInput = convertProcess.StandardInput.BaseStream;
             var standardOutput = convertProcess.StandardOutput.BaseStream;
 
-            using (_tracer.StartActiveSpan("Receiving", out var receivingSpan))
+            using (var receivingSpan = _activitySource.StartActivity("Receiving"))
             {
                 var chunk = 0;
                 var size = 0;
@@ -50,14 +48,13 @@ namespace DotnetGrpcPoc
                     await standardInput.WriteAsync(data, 0, data.Length);
                 }
 
-                receivingSpan.SetAttribute("Chunks", chunk);
-                receivingSpan.SetAttribute("Size", size);
+                receivingSpan.SetTag("Chunks", chunk);
+                receivingSpan.SetTag("Size", size);
             }
 
             standardInput.Close();
 
-
-            using (_tracer.StartActiveSpan("Sending", out var sendingSpan))
+            using (var sendingSpan = _activitySource.StartActivity("Sending"))
             {
                 var buf = new byte[ReadBufSize];
                 var size = 0;
@@ -77,12 +74,12 @@ namespace DotnetGrpcPoc
                     });
                 }
 
-                sendingSpan.SetAttribute("Size", size);
+                sendingSpan.SetTag("Size", size);
             }
 
             convertProcess.WaitForExit();
-            span.SetAttribute("ExitCode", convertProcess.ExitCode);
-            span.End();
+            span.SetTag("ExitCode", convertProcess.ExitCode);
+            span.Stop();
         }
     }
 }

@@ -1,16 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
-using OpenTelemetry.Trace.Configuration;
 using OpenTelemetry.Trace;
-using OpenTelemetry.Trace.Samplers;
 
 namespace DotnetGrpcPoc
 {
@@ -40,18 +34,18 @@ namespace DotnetGrpcPoc
                 jaegerPort = 6831;
             }
 
-            services.AddOpenTelemetry((sp, builder) =>
+            services.AddOpenTelemetryTracing((sp, builder) =>
             {
                 // Sample everything
                 builder.SetSampler(new AlwaysOnSampler())
-                .UseJaeger(o =>
+                .AddJaegerExporter(o =>
                 {
                     o.ServiceName = "DotnetGrpcPoc";
                     o.AgentHost = jaegerUrl;
                     o.AgentPort = jaegerPort;
                 })
-                .AddRequestInstrumentation()
-                .AddDependencyInstrumentation();
+                .AddSource("DotnetGrpcPoc.ConverterService", "DotnetGrpcPoc.GreeterService")
+                .AddAspNetCoreInstrumentation();
             });
             services.AddGrpc();
         }
