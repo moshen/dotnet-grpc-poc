@@ -595,3 +595,35 @@ services.AddOpenTelemetryTracing((sp, builder) =>
 ```
 
 With those changes in place, everything works again.
+
+## 2020-11-18
+
+Updated dotnet code to v5.0.
+
+Changed the `TargetFramework` to `net5.0` in `DotnetGrpcPoc.csproj` and
+`DotnetGrpcPoc.Tests.csproj`, then I updated all my packages to the latest
+versions:
+
+```bash
+cd src/DotnetGrpcPoc/
+dotnet list DotnetGrpcPoc.csproj package \
+  | rg -v '^\s+> OpenTelemetry' \
+  | awk '{ print $2 }' \
+  | xargs -n1 dotnet add DotnetGrpcPoc.csproj package
+dotnet list DotnetGrpcPoc.csproj package \
+  | rg '^\s+> OpenTelemetry' \
+  | awk '{ print $2 }' \
+  | xargs -n1 dotnet add DotnetGrpcPoc.csproj package --prerelease
+
+cd tests/DotnetGrpcPoc.Tests/
+dotnet list DotnetGrpcPoc.Tests.csproj package \
+  | rg -v '^\s+> OpenTelemetry' \
+  | awk '{ print $2 }' \
+  | xargs -n1 dotnet add DotnetGrpcPoc.Tests.csproj package
+dotnet list DotnetGrpcPoc.Tests.csproj package \
+  | rg '^\s+> OpenTelemetry' \
+  | awk '{ print $2 }' \
+  | xargs -n1 dotnet add DotnetGrpcPoc.Tests.csproj package --prerelease
+```
+
+Build and run succeeded afterwards.
