@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
 using OpenTelemetry.Trace;
+using OpenTelemetry.Resources;
 
 namespace DotnetGrpcPoc
 {
@@ -36,11 +37,11 @@ namespace DotnetGrpcPoc
 
             services.AddOpenTelemetryTracing((sp, builder) =>
             {
-                // Sample everything
-                builder.SetSampler(new AlwaysOnSampler())
+                builder
+                .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("DotnetGrpcPoc"))
+                .SetSampler(new AlwaysOnSampler()) // Sample everything
                 .AddJaegerExporter(o =>
                 {
-                    o.ServiceName = "DotnetGrpcPoc";
                     o.AgentHost = jaegerUrl;
                     o.AgentPort = jaegerPort;
                 })

@@ -13,11 +13,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Grpc.AspNetCore" Version="2.33.1" />
-    <PackageReference Include="OpenTelemetry.Api" Version="0.8.0-beta.34" />
-    <PackageReference Include="OpenTelemetry.Exporter.Jaeger" Version="0.8.0-beta.34" />
-    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="0.8.0-beta.34" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="0.8.0-beta.34" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.34.0" />
+    <PackageReference Include="OpenTelemetry.Api" Version="1.0.0-rc1.50" />
+    <PackageReference Include="OpenTelemetry.Exporter.Jaeger" Version="1.0.0-rc1.50" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.0.0-rc1.50" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc1.50" />
   </ItemGroup>
 
 </Project>

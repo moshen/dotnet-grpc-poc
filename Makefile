@@ -1,5 +1,5 @@
 SHELL:=/bin/bash
-.PHONEY: fmt test run run-jaeger stop-jaeger restart-jaeger bootstrap
+.PHONEY: fmt test run run-jaeger stop-jaeger restart-jaeger bootstrap upgrade-dotnet-dependencies
 
 test:
 	dotnet test tests/DotnetGrpcPoc.Tests/
@@ -31,6 +31,23 @@ docker-stop:
 	docker rm dotnet-grpc-poc || exit 0
 
 docker-restart: docker-stop docker-run
+
+upgrade-dotnet-dependencies:
+	cd src/DotnetGrpcPoc/ \
+	&& dotnet list DotnetGrpcPoc.csproj package \
+	  | awk '/^ +> / && !/^ +> OpenTelemetry/{ print $$2 }' \
+	  | xargs -n1 dotnet add DotnetGrpcPoc.csproj package \
+	&& dotnet list DotnetGrpcPoc.csproj package \
+	  | awk '/^ +> OpenTelemetry/{ print $$2 }' \
+	  | xargs -n1 dotnet add DotnetGrpcPoc.csproj package --prerelease
+
+	cd tests/DotnetGrpcPoc.Tests/ \
+	&& dotnet list DotnetGrpcPoc.Tests.csproj package \
+	  | awk '/^ +> / && !/^ +> OpenTelemetry/{ print $$2 }' \
+	  | xargs -n1 dotnet add DotnetGrpcPoc.Tests.csproj package \
+	&& dotnet list DotnetGrpcPoc.Tests.csproj package \
+	  | awk '/^ +> OpenTelemetry/{ print $$2 }' \
+	  | xargs -n1 dotnet add DotnetGrpcPoc.Tests.csproj package --prerelease
 
 bootstrap:
 	dotnet restore --locked-mode

@@ -627,3 +627,46 @@ dotnet list DotnetGrpcPoc.Tests.csproj package \
 ```
 
 Build and run succeeded afterwards.
+
+## 2021-01-14
+
+Added dependency upgrade script to the `Makefile`:
+
+```bash
+cd src/DotnetGrpcPoc/ \
+&& dotnet list DotnetGrpcPoc.csproj package \
+  | awk '/^ +> / && !/^ +> OpenTelemetry/{ print $$2 }' \
+  | xargs -n1 dotnet add DotnetGrpcPoc.csproj package \
+&& dotnet list DotnetGrpcPoc.csproj package \
+  | awk '/^ +> OpenTelemetry/{ print $$2 }' \
+  | xargs -n1 dotnet add DotnetGrpcPoc.csproj package --prerelease
+
+cd tests/DotnetGrpcPoc.Tests/ \
+&& dotnet list DotnetGrpcPoc.Tests.csproj package \
+  | awk '/^ +> / && !/^ +> OpenTelemetry/{ print $$2 }' \
+  | xargs -n1 dotnet add DotnetGrpcPoc.Tests.csproj package \
+&& dotnet list DotnetGrpcPoc.Tests.csproj package \
+  | awk '/^ +> OpenTelemetry/{ print $$2 }' \
+  | xargs -n1 dotnet add DotnetGrpcPoc.Tests.csproj package --prerelease
+```
+
+Upgraded all dotnet dependencies.
+
+The release candidate of OpenTelemetry requires setting the service name on
+the OpenTelemetry builder, instead of in the Jaeger options:
+
+```csharp
+services.AddOpenTelemetryTracing((sp, builder) =>
+{
+    builder
+    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("DotnetGrpcPoc"))
+    .SetSampler(new AlwaysOnSampler()) // Sample everything
+    .AddJaegerExporter(o =>
+    {
+        o.AgentHost = jaegerUrl;
+        o.AgentPort = jaegerPort;
+    })
+    .AddSource("DotnetGrpcPoc.ConverterService", "DotnetGrpcPoc.GreeterService")
+    .AddAspNetCoreInstrumentation();
+});
+```
