@@ -27,6 +27,8 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: 5.0.x
+
+      - name: Bootstrap Dotnet
         run: make bootstrap-dotnet
 
       - name: Run Dotnet Tests
@@ -34,6 +36,8 @@ jobs:
 
       - name: Setup Node environment
         uses: actions/setup-node@v2
+
+      - name: Bootstrap Node
         run: make bootstrap-node
 
       - name: Run e2e Tests
