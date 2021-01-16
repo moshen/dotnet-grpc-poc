@@ -12,18 +12,18 @@
   "author": "",
   "private": true,
   "dependencies": {
-    "@grpc/proto-loader": "^0.5.4",
-    "@opentelemetry/core": "^0.8.2",
-    "@opentelemetry/exporter-jaeger": "^0.8.2",
-    "@opentelemetry/node": "^0.8.2",
-    "@opentelemetry/plugin-grpc": "^0.8.2",
-    "@opentelemetry/plugin-http": "^0.8.2",
-    "@opentelemetry/tracing": "^0.8.2",
-    "grpc": "^1.24.2"
+    "@grpc/proto-loader": "^0.5.5",
+    "@opentelemetry/core": "^0.8.3",
+    "@opentelemetry/exporter-jaeger": "^0.8.3",
+    "@opentelemetry/node": "^0.8.3",
+    "@opentelemetry/plugin-grpc": "^0.8.3",
+    "@opentelemetry/plugin-http": "^0.8.3",
+    "@opentelemetry/tracing": "^0.8.3",
+    "grpc": "^1.24.4"
   },
   "devDependencies": {
-    "file-type": "^14.3.0",
-    "mocha": "^7.1.2",
+    "file-type": "^14.7.1",
+    "mocha": "^7.2.0",
     "should": "^13.2.3"
   }
 }
