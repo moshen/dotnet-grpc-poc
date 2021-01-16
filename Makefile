@@ -1,8 +1,12 @@
 SHELL:=/bin/bash
-.PHONEY: fmt test run run-jaeger stop-jaeger restart-jaeger bootstrap upgrade-dotnet-dependencies
+.PHONEY: fmt test test-dotnet test-e2e run run-jaeger stop-jaeger restart-jaeger bootstrap bootstrap-dotnet bootstrap-node upgrade-dotnet-dependencies
 
-test:
+test: test-dotnet test-e2e
+
+test-dotnet:
 	dotnet test tests/DotnetGrpcPoc.Tests/
+
+test-e2e:
 	tests/scripts/runClientServerTests.bash
 
 fmt:
@@ -49,7 +53,11 @@ upgrade-dotnet-dependencies:
 	  | awk '/^ +> OpenTelemetry/{ print $$2 }' \
 	  | xargs -n1 dotnet add DotnetGrpcPoc.Tests.csproj package --prerelease
 
-bootstrap:
+bootstrap: bootstrap-dotnet bootstrap-node
+
+bootstrap-dotnet:
 	dotnet restore --locked-mode
+
+bootstrap-node:
 	cd src/NodeGrpcClient/ \
 		&& npm ci
