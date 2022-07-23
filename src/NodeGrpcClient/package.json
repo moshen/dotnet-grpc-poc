@@ -22,7 +22,7 @@
     "grpc": "^1.24.4"
   },
   "devDependencies": {
-    "file-type": "^14.7.1",
+    "file-type": "^16.5.4",
     "mocha": "^7.2.0",
     "should": "^13.2.3"
   }
